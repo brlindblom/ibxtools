@@ -72,7 +72,7 @@ function do_incremental_restore(){
   rv=$?; ((rv == 0)) || return $rv
   
   # replay transactions for all incrementals up to ours
-  for idir in $(ls -dt ${snap_dir}/incremental/${1%%.*})*; do
+  for idir in $(ls -dtr ${snap_dir}/incremental/${1%%.*})*; do
     echo "Applying committed transactions from $(basename $idir)..."
     $ibx --decompress --apply-log --redo-only $snap_dir/tmp --incremental-dir $idir
     rv=$?; ((rv == 0)) || return $rv

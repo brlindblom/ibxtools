@@ -4,7 +4,8 @@ I've written these tools to greatly simplify our backups for our InnoDB-based Ma
 
 ## ibxbackup
 
-This is the backup utility.  It does full and incrementals.  I'll add more docs shortly...
+This is the backup utility.  It does full and incrementals.  It also pushes backups to a remote
+server via ssh/rsync and keeps only the last n days of those backups for you
 
 ```
 Usage: ibxbackup
@@ -21,6 +22,23 @@ Usage: ibxbackup
     -v                    Increase verbosity of this tool
     -h                    Display this help
 ```
+
+### Example
+
+```
+# If this is the 1st backup of the day (starting at 00:00), take a full.  Otherwise, take an
+# incremental based off the full (or latest incremental).  Backups are stored locally
+# in the -b and -i directories specified
+[root@db ~]# ibxbackup -b /var/lib/mysql/backup/full -i /var/lib/mysql/backup/incremental
+...
+
+# Take a backup, package up our full and incrementals for the day, and push them to a remote
+# server in a tar archive, keeping 14 days of archives
+[root@db ~]# ibxbackup -b /var/lib/mysql/backup/full -i /var/lib/mysql/backup/incremental \
+  -I /root/.ssh/id_rsa -u backus -s mybackups.example.com -r /backups -n 14
+...
+```
+
 ## ibxrestore
 
 This is the restore utility.  It sets up an instance of mysqld that is back-ended by your
@@ -40,9 +58,9 @@ Usage: ibxrestore
 ### Example
 
 ```
-[root@db ~]# ./ibxrestore -l
+[root@db ~]# ./ibxrestore -l -d /var/lib/mysql/backup
 Full snapshot: 20140902
- - 20140902*
+ - 20140902
 Full snapshot: 20140903
  - 20140903.100002
  - 20140903.110001
