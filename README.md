@@ -1,6 +1,10 @@
 # ibxtools - tools to make MariaDB backups easier
 
-I've written these tools to greatly simplify our backups for our InnoDB-based MariaDB cluster
+I've written these tools to greatly simplify our backups for our InnoDB-based MariaDB cluster.
+They require `innobackupex` and `qpress` executables:
+
+http://www.percona.com/doc/percona-xtrabackup/2.1/innobackupex/innobackupex_script.html
+http://www.quicklz.com/
 
 ## ibxbackup
 
