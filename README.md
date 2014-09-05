@@ -74,10 +74,11 @@ MariaDB [(none)]> show databases;
 | Database                     |
 +------------------------------+
 | information_schema           |
-| hpssicccsornlgov_hpssic_prod |
 | mysql                        |
 | performance_schema           |
-| rtccsornlgov_rt_dev          |
+| db1                          |
+| db2                          |
+| ...                          |
 +------------------------------+
 5 rows in set (0.02 sec)
      
