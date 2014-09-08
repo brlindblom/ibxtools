@@ -6,7 +6,7 @@ BuildArch:noarch
 Group:		MySQL Database server
 License:	GPL
 URL:		  https://github.com/brlindblom/ibxtools
-Source0:	https://github.com/brlindblom/ibxtools/archive/master.zip
+Source0:	ibxtools-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 Requires:	percona-xtrabackup /usr/bin/mysql /usr/bin/mysqldump /usr/bin/mysqladmin
