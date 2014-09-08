@@ -16,7 +16,7 @@ ibxtools provides backup and restore scripts for managing backups on InnoDB-base
 MySQL/Percona/MariaDB database servers
 
 %prep
-%setup -n ibxtools-master
+%setup -n ibxtools-%{version}
 
 %install
 rm -rf %{buildroot}
