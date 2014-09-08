@@ -11,7 +11,7 @@ snap_dir=/data/ssd/backups
 ibx=innobackupex
 
 # Defaults file
-defaults_file=/etc/my.ibxtools.cnf
+defaults_file=/etc/my.ibxrestore.cnf
 defaults_extra_file=/etc/my.backup.cnf
 
 function print_usage(){
@@ -63,20 +63,34 @@ function do_full_restore(){
 }
 
 function do_incremental_restore(){
+  local last_lsn
   echo "Staging incremental state snapshot to temporary mysqld data directory $snap_dir/tmp..."
   rsync -a --delete $snap_dir/full/${1%%.*}/ $snap_dir/tmp/
   rv=$?; ((rv == 0)) || return $rv
 
-  echo "Applying committed transactions from the log..."
-  $ibx --decompress --apply-log --redo-only $snap_dir/tmp
+  echo "Decompressing full state snapshot ${1%%.*}..."
+  $ibx --decompress $snap_dir/tmp &> /tmp/$ibx.last
   rv=$?; ((rv == 0)) || return $rv
-  
+
+  echo "Replaying any transactions on full state snapshot..."
+  $ibx --apply-log $snap_dir/tmp &> /tmp/$ibx.last
+  rv=$?; ((rv == 0)) || return $rv
+
   # replay transactions for all incrementals up to ours
-  for idir in $(ls -dtr ${snap_dir}/incremental/${1%%.*})*; do
-    echo "Applying committed transactions from $(basename $idir)..."
-    $ibx --decompress --apply-log --redo-only $snap_dir/tmp --incremental-dir $idir
+  for idir in $(ls -dtr ${snap_dir}/incremental/${1%%.*}*); do
+    lsn=$(awk '/last_lsn/ { print $3 }' $idir/xtrabackup_checkpoints)
+    if [[ "$lsn" == "$last_lsn" ]]; then
+      echo "Skipping incremental $(basename $idir) where nothing changed"
+      continue
+    fi
+    echo "Applying committed transactions from $(basename $idir) last_lsn=$lsn..."
+    mkdir -p $snap_dir/tmp/$(basename $idir)
+    rsync -a --delete $idir/ $snap_dir/tmp/$(basename $idir)/
+    $ibx --decompress $snap_dir/tmp/$(basename $idir)/ &> /tmp/$ibx.last
+    $ibx --apply-log --redo-only $snap_dir/tmp --incremental-dir $snap_dir/tmp/$(basename $idir)/ &> /tmp/$ibx.last
     rv=$?; ((rv == 0)) || return $rv
     [[ "$(basename $idir)" == "$1" ]] && break
+    last_lsn=$lsn
   done
   echo "Setting ownership..."
   chown -R mysql:mysql $snap_dir/tmp

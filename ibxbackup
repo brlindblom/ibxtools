@@ -230,6 +230,10 @@ else
   log local1.info "Starting $btype backup"
 fi
 
+# get rid of the old state snapshots.  We do this 1st in order to avoid any
+# ENOSPC issues
+purge_state_snapshots
+
 # call innobackupex
 echo $ibx ${ibx_default_args[@]} $ibx_addl_args >/tmp/mariabackup.sh.last_run
 $ibx ${ibx_default_args[@]} $ibx_addl_args >> /tmp/mariabackup.sh.last_run 2>&1
@@ -241,7 +245,6 @@ if ((retval != 0)); then
 else
   log local1.info "innobackupex ($btype) completed successfully"
   # get rid of the old state snapshots
-  purge_state_snapshots
 fi
 
 # If a server is specified, we should create an aggregate and send it there
