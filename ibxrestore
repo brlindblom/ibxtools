@@ -39,6 +39,11 @@ Source the aliases file to gain appropriate mysql commands:
   $ mysqladmin  # mysqladmin to connect to aforementioned mysqld
   $ mysqladmin shutdown  # shuts down mysqld instance
 
+Cleanup:
+
+  $ unalias mysql mysqld mysqldump mysqladmin
+  $ rf -rf $snap_dir/tmp/*
+
 EOF
 }
 

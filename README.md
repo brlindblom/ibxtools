@@ -81,8 +81,20 @@ Applying transactions from 20140903.110001
 ...
 Applying transactions from 20140903.150001
 ...
-==== Starting ibxrestore shell ====
-[~ibxshell:20140903.150001~ root@db ~]# mysql
+==== Continuing restore process...  ====
+Source the aliases file to gain appropriate mysql commands:
+
+  $ source /tmp/ibxrestorerc.12345
+  $ mysqld      # start a mysqld instance backed by the restored data
+  $ mysql       # mysql client to connect to aforementioned mysqld
+  $ mysqldump   # mysqldump to connect to aforementioned mysqld
+  $ mysqladmin  # mysqladmin to connect to aforementioned mysqld
+  $ mysqladmin shutdown  # shuts down mysqld instance
+
+
+[root@db ~]# source /tmp/ibxrestorerc.12345
+[root@db ~]# mysqld
+[root@db ~]# mysql
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MariaDB connection id is 1
 Server version: 5.5.38-MariaDB-wsrep MariaDB Server, wsrep_25.10.r3997
@@ -106,7 +118,6 @@ MariaDB [(none)]> show databases;
      
 MariaDB [(none)]> Bye
 
-[~ibxshell:20140903.150001~ root@db7-dev ~]# exit
 Stopping MySQL server instance...
 Done
 [root@db ~]#
