@@ -27,14 +27,17 @@ Usage: $self
 EOF
 }
 
-function print_ibx_restore_shell_banner(){
+function print_ibx_restore_banner(){
   cat <<EOF
-==== ibxrestore shell ====
-This is a normal bash shell with supplied aliases to make it really
-easy for you to work with the restored database instance.  Normal mysql
-commands will automatically communicate with the restored instance
-so you can inspect tables, do dumps, etc.  Simply 'exit' or Ctrl-D to
-close the session and shut down the restore instance
+==== Continuing restore process...  ====
+Source the aliases file to gain appropriate mysql commands:
+
+  $ source /tmp/ibxrestorerc.$$
+  $ mysqld      # start a mysqld instance backed by the restored data
+  $ mysql       # mysql client to connect to aforementioned mysqld
+  $ mysqldump   # mysqldump to connect to aforementioned mysqld
+  $ mysqladmin  # mysqladmin to connect to aforementioned mysqld
+  $ mysqladmin shutdown  # shuts down mysqld instance
 
 EOF
 }
@@ -63,7 +66,7 @@ function do_full_restore(){
 }
 
 function do_incremental_restore(){
-  local last_lsn
+  local last_to_lsn
   echo "Staging incremental state snapshot to temporary mysqld data directory $snap_dir/tmp..."
   rsync -a --delete $snap_dir/full/${1%%.*}/ $snap_dir/tmp/
   rv=$?; ((rv == 0)) || return $rv
@@ -78,34 +81,32 @@ function do_incremental_restore(){
 
   # replay transactions for all incrementals up to ours
   for idir in $(ls -dtr ${snap_dir}/incremental/${1%%.*}*); do
-    lsn=$(awk '/last_lsn/ { print $3 }' $idir/xtrabackup_checkpoints)
-    if [[ "$lsn" == "$last_lsn" ]]; then
-      echo "Skipping incremental $(basename $idir) where nothing changed"
+    if [[ ! -f $idir/xtrabackup_checkpoints ]]; then
+      echo "Skipping incremental $(basename $idir) with missing checkpoint file"
       continue
     fi
-    echo "Applying committed transactions from $(basename $idir) last_lsn=$lsn..."
+
+    #lsn=$(awk '/to_lsn/ { print $3 }' $idir/xtrabackup_checkpoints)
+    #blsn=$(awk '/from_lsn/ { print $3 }' $idir/xtrabackup_checkpoints)
+
+    #if [[ "$lsn" == "$last_to_lsn" || ! -f $idir/xtrabackup_checkpoints ]]; then
+    #  echo "Skipping incremental $(basename $idir) where nothing changed"
+    #  continue
+    #fi
+
+    echo "Applying committed transactions from $(basename $idir)..."
     mkdir -p $snap_dir/tmp/$(basename $idir)
     rsync -a --delete $idir/ $snap_dir/tmp/$(basename $idir)/
     $ibx --decompress $snap_dir/tmp/$(basename $idir)/ &> /tmp/$ibx.last
     $ibx --apply-log --redo-only $snap_dir/tmp --incremental-dir $snap_dir/tmp/$(basename $idir)/ &> /tmp/$ibx.last
     rv=$?; ((rv == 0)) || return $rv
     [[ "$(basename $idir)" == "$1" ]] && break
-    last_lsn=$lsn
+    last_to_lsn=$lsn
   done
+  # final apply log to get transaction ids into sync
+  $ibx --apply-log $snap_dir/tmp
   echo "Setting ownership..."
   chown -R mysql:mysql $snap_dir/tmp
-  return $?
-}
-
-function start_mysqld_restore_instance(){
-  rm -f /tmp/ibxrestore.log
-  echo "Starting mysqld instance..."
-  mysqld_safe --defaults-file=$defaults_file --nowatch
-  
-  echo "Waiting for recovery to complete..."
-  while ! grep -q socket /tmp/ibxrestore.log; do
-    sleep 1
-  done
   return $?
 }
 
@@ -142,22 +143,15 @@ if [[ -n "$snap" ]]; then
     exit 1
   fi 
 
-  start_mysqld_restore_instance
-
   # Let's start an interactive shell with approprate aliases
   mysql_opts="--defaults-extra-file=$defaults_extra_file -S /tmp/ibxrestore.sock"
-  cat > /tmp/.ibxrestorerc <<EOF
+  cat > /tmp/ibxrestorerc.$$ <<EOF
 source ~/.bashrc
 alias mysql="mysql $mysql_opts"
 alias mysqldump="mysqldump $mysql_opts"
 alias mysqladmin="mysqladmin $mysql_opts"
-export PS1='[~ibxrestore~ \u@\h \W]\$ '
+alias mysqld="mysqld_safe --defaults-file=$defaults_file &"
 EOF
 
-  print_ibx_restore_shell_banner
-  bash -l --rcfile /tmp/.ibxrestorerc
-  echo "==== Exited ibxrestore shell ===="
-  mysqladmin $mysql_opts shutdown
-  clear
-  rm -f /tmp/.ibxrestorerc /tmp/ibxrestore.sock
+  print_ibx_restore_banner
 fi
