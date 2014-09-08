@@ -51,13 +51,13 @@ function make_backup_aggregate(){
   
   # handle incrementals
   if [[ -n "$incremental" ]]; then
-    for i in $incremental/*; do
+    for i in $(ls $incremental 2>/dev/null); do
       j=$(basename $i)
       (( ${j%%.*} == ${tstamp%%.*} )) && job_paths="$job_paths $i"
     done
   else
   # handle fulls
-    for i in $full_dir/*; do
+    for i in $(ls $full_dir/* 2>/dev/null); do
       j=$(basename $i)
       (( ${j%%.*} == ${tstamp%%.*} )) && job_paths="$job_paths $i"
     done
@@ -130,7 +130,7 @@ function purge_state_snapshots(){
   
   # handle incrementals
   if [[ -n "$incremental" ]]; then
-    for i in $(ls $incremental); do
+    for i in $(ls $incremental &2>/dev/null); do
       i=$(basename $i)
       if (( ${i%%.*} < ${old_stamp%%.*} )); then
         log local1.info "Removing old incremental $i"
@@ -139,7 +139,7 @@ function purge_state_snapshots(){
     done
   else
   # handle fulls
-    for i in $(ls $full_dir); do
+    for i in $(ls $full_dir 2>/dev/null); do
       i=$(basename $i)
       if (( ${i%%.*} < ${old_stamp%%.*} )); then
         log local1.info "Removing old full backup $i"
@@ -221,6 +221,7 @@ ssh_opts="-q"
 # do incrementals by default.  take a full if we don't have one for the day
 if [[ -d "$full_dir/$fstamp" ]]; then
   btype=incremental
+  mkdir -p $incremental
   # find our last incremental
   last_dir=$(ls -dtr $incremental/$fstamp* 2> /dev/null|tail -n1) 
   [[ -z "$last_dir" ]] && last_dir=$full_dir/$fstamp
