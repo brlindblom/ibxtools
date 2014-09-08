@@ -222,7 +222,7 @@ ssh_opts="-q"
 if [[ -d "$full_dir/$fstamp" ]]; then
   btype=incremental
   # find our last incremental
-  last_dir=$(ls -dtr $incremental/$fstamp*|tail -n1) 
+  last_dir=$(ls -dtr $incremental/$fstamp* 2> /dev/null|tail -n1) 
   [[ -z "$last_dir" ]] && last_dir=$full_dir/$fstamp
   ibx_addl_args="--incremental $incremental/$istamp --incremental-basedir=$last_dir"
   log local1.info "Starting $btype backup against $last_dir"
