@@ -21,10 +21,12 @@ MySQL/Percona/MariaDB database servers
 %install
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/bin
+mkdir -p %{buildroot}/etc
 mkdir -p %{buildroot}%{_docdir}
 cp ibxbackup %{buildroot}/usr/bin/
 cp ibxrestore %{buildroot}/usr/bin/
 cp README.md %{buildroot}%{_docdir}/
+cp my.ibxtools.cnf %{buildroot}/etc
 
 %clean
 rm -rf %{buildroot}
@@ -34,6 +36,7 @@ rm -rf %{buildroot}
 %doc %_docdir/README.md
 %_bindir/ibxbackup
 %_bindir/ibxrestore
+%config /etc/my.ibxtools.cnf
 
 %changelog
 * Mon Sep 9  2014 - lindblom (at) ornl.gov
