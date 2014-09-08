@@ -179,7 +179,8 @@ echo $$ > $self_pid
 # set default command and args
 ibx=innobackupex
 ibx_default_args=("--defaults-extra-file=$extra_file" "--galera-info" "--compress" \ 
-                  "--compress-threads=0" "--parallel=0" "--no-timestamp")
+                  "--compress-threads=0" "--parallel=$(grep '^model name' /proc/cpuinfo | wc -l)" \
+                  "--no-timestamp")
 
 # timestamps we'll use to determine backup directories, etc
 fstamp=$(date +"%Y%m%d")
