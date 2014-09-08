@@ -31,6 +31,7 @@ function print_usage(){
 Usage: $self
   $self <options>
     -b <full_backup_dir>  Required: Specify path to full backup directory
+    -e <defaults_extra>   Optional: Additional defaults file to pass to innobackupex
     -i <incremental_dir>  Required: Specify incremental destination
     -I <identity_file>    Optional: Specify SSH identity file
     -n <#of_days>         Optional: Specify the number of days to keep (default 14)
@@ -185,7 +186,7 @@ fstamp=$(date +"%Y%m%d")
 istamp=$(date +"%Y%m%d.%H%M%S")
 
 # parse our cmd args
-while getopts "hvfb:i:I:n:r:s:u:" opt; do
+while getopts "hvfb:i:I:n:r:s:u:e:" opt; do
   case "$opt" in
     i) incremental=${OPTARG} ;;
     b) full_dir=${OPTARG} ;;
@@ -193,6 +194,7 @@ while getopts "hvfb:i:I:n:r:s:u:" opt; do
     I) identity=${OPTARG} ;;
     r) remote_dir=${OPTARG} ;;
     s) server=${OPTARG} ;;
+    e) extra_file=${OPTARG} ;;
     u) remote_user=${OPTARG} ;;
     v) ((verbose++)) ;;
     h) print_usage; exit 0 ;;

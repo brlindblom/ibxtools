@@ -2,7 +2,7 @@ Name:     ibxtools
 Version:	0.1
 Release:	1%{?dist}
 Summary:	Backup tools for InnoDB-backed databases
-
+BuildArch:noarch
 Group:		MySQL Database server
 License:	GPL
 URL:		  https://github.com/brlindblom/ibxtools

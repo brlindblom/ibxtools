@@ -11,7 +11,7 @@ snap_dir=/data/ssd/backups
 ibx=innobackupex
 
 # Defaults file
-defaults_file=/etc/my.ibxrestore.cnf
+defaults_file=/etc/my.ibxtools.cnf
 defaults_extra_file=/etc/my.backup.cnf
 
 function print_usage(){
