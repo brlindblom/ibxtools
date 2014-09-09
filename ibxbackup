@@ -126,13 +126,13 @@ EOF
 
 # Get rid of incrementals/fulls older than $purge_older_than
 function purge_state_snapshots(){
-  old_stamp=$(date -d"$purge_older_than" +%Y%m%d.%H%M%S)
+  old_stamp=$(date -d"$purge_older_than" +%Y%m%d)
   
   # handle incrementals
   if [[ -n "$incremental" ]]; then
     for i in $(ls $incremental &2>/dev/null); do
       i=$(basename $i)
-      if (( ${i%%.*} < ${old_stamp%%.*} )); then
+      if (( ${i%%.*} < old_stamp )); then
         log local1.info "Removing old incremental $i"
         rm -rf -- $incremental/$i
       fi
@@ -141,7 +141,7 @@ function purge_state_snapshots(){
   # handle fulls
     for i in $(ls $full_dir 2>/dev/null); do
       i=$(basename $i)
-      if (( ${i%%.*} < ${old_stamp%%.*} )); then
+      if (( i < old_stamp )); then
         log local1.info "Removing old full backup $i"
         rm -rf -- $full_dir/$i
       fi
