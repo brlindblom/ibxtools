@@ -134,7 +134,7 @@ function purge_state_snapshots(){
       i=$(basename $i)
       if (( ${i%%.*} < ${old_stamp%%.*} )); then
         log local1.info "Removing old incremental $i"
-        echo rm -rf $incremental/$i
+        rm -rf -- $incremental/$i
       fi
     done
   else
@@ -143,7 +143,7 @@ function purge_state_snapshots(){
       i=$(basename $i)
       if (( ${i%%.*} < ${old_stamp%%.*} )); then
         log local1.info "Removing old full backup $i"
-        echo rm -rf $full_dir/$i
+        rm -rf -- $full_dir/$i
       fi
     done
   fi
@@ -195,6 +195,7 @@ while getopts "hvfb:i:I:n:r:s:u:e:" opt; do
     I) identity=${OPTARG} ;;
     r) remote_dir=${OPTARG} ;;
     s) server=${OPTARG} ;;
+    t) tmpdir=${OPTARG} ;;
     e) extra_file=${OPTARG} ;;
     u) remote_user=${OPTARG} ;;
     v) ((verbose++)) ;;
