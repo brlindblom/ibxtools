@@ -62,7 +62,7 @@ function make_backup_aggregate(){
       (( j == ${tstamp%%.*} )) && job_paths="$job_paths $i"
     done
   fi  
-  log local1.debug tar czf $1 $job_paths
+  log local1.info "Creating backup aggregate for ${tstamp%%.*}..."
   tar czf $1 $job_paths &> /dev/null
   return $?
 }
@@ -71,11 +71,11 @@ function make_backup_aggregate(){
 function push_aggregate(){
   rsync_opts="-a"
 
-  log local1.debug "ssh ${ssh_opts} $server mkdir -p ${remote_dir}"
+  log local1.info "Verifying presence of ${server}:${remote_dir}/ ..."
   ssh ${ssh_opts} $server mkdir -p ${remote_dir}
   (( $? != 0 )) && return 1
 
-  log local1.debug "rsync ${rsync_opts} -e \"ssh ${ssh_opts}\" $1 ${server}:${remote_dir}/"
+  log local1.info "Transfering $1 to ${server}:${remote_dir}/ ..."
   rsync ${rsync_opts} -e "ssh ${ssh_opts}" $1 ${server}:${remote_dir}/
   return 0
 }
