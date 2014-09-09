@@ -59,7 +59,7 @@ function make_backup_aggregate(){
   # handle fulls
     for i in $(ls $full_dir/* 2>/dev/null); do
       j=$(basename $i)
-      (( ${j%%.*} == ${tstamp%%.*} )) && job_paths="$job_paths $i"
+      (( j == ${tstamp%%.*} )) && job_paths="$job_paths $i"
     done
   fi  
   log local1.debug tar czf $1 $job_paths
