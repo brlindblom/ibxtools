@@ -187,7 +187,7 @@ fstamp=$(date +"%Y%m%d")
 istamp=$(date +"%Y%m%d.%H%M%S")
 
 # parse our cmd args
-while getopts "hvfb:i:I:n:r:s:u:e:" opt; do
+while getopts "hvfb:i:I:n:r:s:u:e:t:" opt; do
   case "$opt" in
     i) incremental=${OPTARG} ;;
     b) full_dir=${OPTARG} ;;
