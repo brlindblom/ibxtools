@@ -63,6 +63,7 @@ function make_backup_aggregate(){
     done
   fi  
   log local1.info "Creating backup aggregate for ${tstamp%%.*}..."
+  echo tar czf $1 $job_paths
   tar czf $1 $job_paths &> /dev/null
   return $?
 }
@@ -86,7 +87,7 @@ write_status_log() {
   now=$(date +%Y-%m-%dT%H:%M:%S)
   log_message="${longstarttime},${now},${1}"
   log_file="${remote_dir}/status.log"
-  ssh ${ssh_opts} $server "echo ${log_message} >> ${log_file}"
+  ssh ${ssh_opts} $server "mkdir -p ${remote_dir}; echo ${log_message} >> ${log_file}"
 }
 
 # This function injects a small script to the backup server and uses it to remove old 
