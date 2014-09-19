@@ -50,18 +50,15 @@ function make_backup_aggregate(){
   job_paths=""
   
   # handle incrementals
-  if [[ -n "$incremental" ]]; then
-    for i in $(ls $incremental 2>/dev/null); do
-      j=$(basename $i)
-      (( ${j%%.*} == ${tstamp%%.*} )) && job_paths="$job_paths $i"
-    done
-  else
+  for i in $(ls $incremental 2>/dev/null); do
+    j=$(basename $i)
+    (( ${j%%.*} == ${tstamp%%.*} )) && job_paths="$job_paths $incremental/$i"
+  done
   # handle fulls
-    for i in $(ls $full_dir/* 2>/dev/null); do
-      j=$(basename $i)
-      (( j == ${tstamp%%.*} )) && job_paths="$job_paths $i"
-    done
-  fi  
+  for i in $(ls $full_dir/* 2>/dev/null); do
+    j=$(basename $i)
+    (( j == ${tstamp%%.*} )) && job_paths="$job_paths $full_dir/$i"
+  done
   log local1.info "Creating backup aggregate for ${tstamp%%.*}..."
   echo tar czf $1 $job_paths
   tar czf $1 $job_paths &> /dev/null
@@ -130,24 +127,21 @@ function purge_state_snapshots(){
   old_stamp=$(date -d"$purge_older_than" +%Y%m%d)
   
   # handle incrementals
-  if [[ -n "$incremental" ]]; then
-    for i in $(ls $incremental &2>/dev/null); do
-      i=$(basename $i)
-      if (( ${i%%.*} < old_stamp )); then
-        log local1.info "Removing old incremental $i"
-        rm -rf -- $incremental/$i
-      fi
-    done
-  else
+  for i in $(ls $incremental &2>/dev/null); do
+    i=$(basename $i)
+    if (( ${i%%.*} < old_stamp )); then
+      log local1.info "Removing old incremental $i"
+      rm -rf -- $incremental/$i
+    fi
+  done
   # handle fulls
-    for i in $(ls $full_dir 2>/dev/null); do
-      i=$(basename $i)
-      if (( i < old_stamp )); then
-        log local1.info "Removing old full backup $i"
-        rm -rf -- $full_dir/$i
-      fi
-    done
-  fi
+  for i in $(ls $full_dir 2>/dev/null); do
+    i=$(basename $i)
+    if (( i < old_stamp )); then
+      log local1.info "Removing old full backup $i"
+      rm -rf -- $full_dir/$i
+    fi
+  done
 }
 
 # go to syslog by default.  print to screen if verbose
