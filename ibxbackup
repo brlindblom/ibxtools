@@ -51,15 +51,13 @@ function make_backup_aggregate(){
   
   # handle incrementals
   for i in $(ls $incremental 2>/dev/null); do
-    j=$(basename $i)
-    (( ${j%%.*} == ${tstamp%%.*} )) && job_paths="$job_paths $incremental/$i"
+    (( ${j%%.*} == ${tstamp} )) && job_paths="$job_paths $incremental/$i"
   done
   # handle fulls
   for i in $(ls $full_dir/* 2>/dev/null); do
-    j=$(basename $i)
-    (( j == ${tstamp%%.*} )) && job_paths="$job_paths $full_dir/$i"
+    (( i == ${tstamp} )) && job_paths="$job_paths $full_dir/$i"
   done
-  log local1.info "Creating backup aggregate for ${tstamp%%.*}..."
+  log local1.info "Creating backup aggregate for ${tstamp}..."
   echo tar czf $1 $job_paths
   tar czf $1 $job_paths &> /dev/null
   return $?
