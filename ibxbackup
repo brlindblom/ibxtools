@@ -51,7 +51,7 @@ function make_backup_aggregate(){
   
   # handle incrementals
   for i in $(ls $incremental 2>/dev/null); do
-    (( ${j%%.*} == ${tstamp} )) && job_paths="$job_paths $incremental/$i"
+    (( ${i%%.*} == ${tstamp} )) && job_paths="$job_paths $incremental/$i"
   done
   # handle fulls
   for i in $(ls $full_dir/* 2>/dev/null); do
