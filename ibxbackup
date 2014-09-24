@@ -54,7 +54,7 @@ function make_backup_aggregate(){
     (( ${i%%.*} == ${tstamp} )) && job_paths="$job_paths $incremental/$i"
   done
   # handle fulls
-  for i in $(ls $full_dir/* 2>/dev/null); do
+  for i in $(ls $full_dir 2>/dev/null); do
     (( i == ${tstamp} )) && job_paths="$job_paths $full_dir/$i"
   done
   log local1.info "Creating backup aggregate for ${tstamp}..."
@@ -103,7 +103,7 @@ bc=${#backups[@]}
 if (( bc > copies )); then
   for d in "${backups[@]:$copies:$bc}"; do
     if [[ -d ${path}/${d} && -w ${path}/${d} ]]; then
-      logger -t mariapurgebackup.sh -p local1.info "Removing old backup archive ${path}/${d}"
+      logger -t backup_mariadb_purge -p local1.info "Removing old backup archive ${path}/${d}"
       #rm -rf ${path}/${d}
     fi
   done
@@ -114,7 +114,7 @@ EOF
   # Remove backups such that a maximum of $oldcopies remain
   remote_cmd="base64 -d > $remscript; bash $remscript ${remote_dir} $days; rm -f $remscript"
 
-  log local1.info ssh $ssh_opts $server "$remote_cmd"
+  log local1.info "Purging any old backup archives from ${server}..."
   ssh $ssh_opts $server "$remote_cmd" <<<"$purge_code"
 
   return $?
