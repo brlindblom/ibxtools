@@ -58,7 +58,6 @@ function make_backup_aggregate(){
     (( i == ${tstamp} )) && job_paths="$job_paths $full_dir/$i"
   done
   log local1.info "Creating backup aggregate for ${tstamp}..."
-  echo tar czf $1 $job_paths
   tar czf $1 $job_paths &> /dev/null
   return $?
 }
